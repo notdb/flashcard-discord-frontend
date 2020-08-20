@@ -1,0 +1,28 @@
+{
+  "name": "flashcard-discord-frontend",
+  "version": "1.0.0",
+  "description": "A Discord bot frontend for simple flashcard backend",
+  "main": "index.js",
+  "scripts": {
+      "test": "jest",
+      "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/notdb/flashcard-discord-frontend.git"
+  },
+  "author": "Doug",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/notdb/flashcard-discord-frontend/issues"
+  },
+  "homepage": "https://github.com/notdb/flashcard-discord-frontend#readme",
+  "dependencies": {
+    "cross-env": "^7.0.2",
+    "discord.js": "^12.3.1",
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
