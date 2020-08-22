@@ -2,6 +2,7 @@ const { Client, MessageEmbed } = require("discord.js");
 const client = new Client();
 require("dotenv").config();
 const myHttp = require("https");
+const myHttps = require("http");
 
 let text = "";
 
@@ -21,10 +22,31 @@ client.on("message", message => {
     message.channel.send("Pong.");
     const embed = new MessageEmbed().setTitle("testembed");
     message.channel.send(embed);
-    message.channel.send(text[0].front);
+    console.log(`${message.author.username}#${message.author.discriminator}`);
   }
   if (message.content === "!back") {
     message.channel.send(text[0].arcadename);
+  }
+  if (message.content === "!login") {
+    let uniqueUser = `${message.author.username}#${
+      message.author.discriminator
+    }`;
+    myHttps.get(
+      `http://localhost:5000/api/auth/exists?user=${uniqueUser}`,
+      res => {
+        res.on("data", data => {
+          let answer = JSON.parse(data);
+          console.log(answer);
+          if (answer.message == 1) {
+            message.channel.send(`already logged in`);
+          } else {
+            message.channel.send(
+              `Login with https://localhost:5000/api/login?user=${uniqueUser}`
+            );
+          }
+        });
+      }
+    );
   }
 });
 
