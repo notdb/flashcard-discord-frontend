@@ -1,9 +1,8 @@
-const { Client, MessageEmbed } = require("discord.js");
+const { Client, MessageEmbed, ClientApplication } = require("discord.js");
 const client = new Client();
 require("dotenv").config();
 const myHttp = require("https");
 const myHttps = require("http");
-
 let text = "";
 
 myHttp.get("https://wfgc-backend.herokuapp.com/api/arcades", res => {
@@ -23,6 +22,7 @@ client.on("message", message => {
     const embed = new MessageEmbed().setTitle("testembed");
     message.channel.send(embed);
     console.log(`${message.author.username}#${message.author.discriminator}`);
+    console.log(message);
   }
   if (message.content === "!back") {
     message.channel.send(text[0].arcadename);
