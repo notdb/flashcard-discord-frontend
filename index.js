@@ -23,8 +23,21 @@ const loginOptions = {
   }
 };
 
-let listOfMessages = ["one", "two", "three"];
-
+let listOfMessages = [
+  {
+    front: "What is two plus two?",
+    back: "four"
+  },
+  {
+    front: "What is two plus four?",
+    back: "six"
+  },
+  {
+    front: "What is eight plus four?",
+    back: "twelve"
+  }
+];
+let currentMessage = listOfMessages.shift();
 const postData = JSON.stringify({
   username: process.env.USER_NAME,
   password: process.env.PASSWORD
@@ -59,6 +72,7 @@ client.once("ready", () => {
 client.on("messageReactionAdd", message => {
   //console.log(message.message.reactions.cache.get("👎").message.id);
   //console.log(message.message.reactions.cache.get("👍").message.id);
+  // flip card
   let reactionOne = message.message.reactions.cache;
   console.log(message.message.content);
   if (reactionOne.has("↪")) {
@@ -73,11 +87,11 @@ client.on("messageReactionAdd", message => {
           .get("↪")
           .users.cache.has(message.message.channel.recipient.id)
       ) {
-        message.message.edit("next");
+        message.message.edit(currentMessage.back);
       }
     }
   }
-
+  // if you get the answer correct, go to the next message
   if (reactionOne.has("👍")) {
     if (reactionOne.get("👍").message.id !== "746130077216931941") {
       if (
@@ -86,9 +100,49 @@ client.on("messageReactionAdd", message => {
           .users.cache.has(message.message.channel.recipient.id)
       ) {
         console.log("hello");
-        message.message.channel.send(listOfMessages.shift()).then(message => {
-          message.react("↪");
-        });
+        // go to next message
+        if (listOfMessages.length == 0) {
+          message.message.channel.send(`Done`);
+        } else {
+          currentMessage = listOfMessages.shift();
+          message.message.channel.send(
+            `Number of cards left: ${listOfMessages.length + 1}`
+          );
+          message.message.channel
+            .send(`Question: \n \n ${currentMessage.front} \n \n`)
+            .then(message => {
+              message.react("↪");
+            });
+          message.message.channel.send("Got it right?").then(message => {
+            message.react("👍");
+          });
+          message.message.channel.send("I missed it").then(message => {
+            message.react("👎");
+          });
+        }
+      }
+    }
+  }
+  // if you get the answer wrong, move the message to the back of the queue
+  if (reactionOne.has("👎")) {
+    if (reactionOne.get("👎").message.id !== "746130077216931941") {
+      if (
+        reactionOne
+          .get("👎")
+          .users.cache.has(message.message.channel.recipient.id)
+      ) {
+        // move current card to back of queue
+        console.log("answer was wrong");
+        console.log("before ", listOfMessages.length);
+        listOfMessages.push(currentMessage);
+        console.log("after ", listOfMessages.length);
+        // go to next message
+        currentMessage = listOfMessages.shift();
+        message.message.channel
+          .send(`Question: \n \n ${currentMessage.front} \n \n`)
+          .then(message => {
+            message.react("↪");
+          });
         message.message.channel.send("Got it right?").then(message => {
           message.react("👍");
         });
@@ -106,7 +160,7 @@ client.on("message", async message => {
     let question2 =
       "\n Question: \n Removing reactions by user is not as straightforward as removing by [...] or removing all reactions. The API does not provide a method for selectively removing reactions of a user";
     //console.log(message.channel);
-    message.channel.send(question2).then(message => {
+    message.channel.send(currentMessage.front).then(message => {
       message.react("↪");
     });
     const embed = new MessageEmbed().setTitle("testembed");
@@ -169,6 +223,9 @@ client.on("message", async message => {
         });
       }
     );
+  }
+  if (message.content === "!left") {
+    message.channel.send(`You have ${listOfMessages.length + 1} cards left`);
   }
   if (message.content === "!login") {
     let uniqueUser = `${message.author.username}%23${
