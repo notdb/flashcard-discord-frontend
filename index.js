@@ -44,14 +44,17 @@ const postData = JSON.stringify({
 });
 
 const req = myHttps.request(loginOptions, res => {
-  console.log(`Status: ${res.statusCode}`);
+    console.log(`Status: ${res.statusCode}`);
+    //console.log(res);
   res.setEncoding("utf8");
 
-  res.on("data", chunk => {
+    res.on("data", chunk => {
+	console.log(chunk);
     token += chunk;
   });
   res.on("end", () => {
-    console.log("No more data in response");
+      console.log("No more data in response");
+      console.log(token);
     token = JSON.parse(token);
   });
 });
@@ -72,9 +75,47 @@ client.once("ready", () => {
 client.on("messageReactionAdd", message => {
   //console.log(message.message.reactions.cache.get("👎").message.id);
   //console.log(message.message.reactions.cache.get("👍").message.id);
-  // flip card
-  let reactionOne = message.message.reactions.cache;
+
+  // flip card !start2
+  const embed4 = {
+    title: "Some title",
+    fields: [
+      {
+        name: "Question",
+        value:
+          "Removing reactions by user is not as straightforward as removing by [...] or removing all reactions. The API does not provide a method for selectively removing reactions of a user"
+      },
+      {
+        name: "\u200b",
+        value: "Press the green apple to flip the card, then thumbs up or down"
+      }
+    ]
+  };
+  embed4.fields[0].value = currentMessage.back;
+    let reactionOne = message.message.reactions.cache;
   console.log(message.message.content);
+    //console.log(reactionOne);
+  if (reactionOne.has("↩️")) {
+    if (reactionOne.get("↩️").message.id !== "746130077216931941") {
+      console.log(
+        reactionOne
+          .get("↩️")
+              .users.cache.has('746130077216931941'.lastMessageID)
+      );
+      if (
+        reactionOne
+          .get("↩️")
+          .users.cache.has('746130077216931941'.lastMessageID)
+      ) {
+        message.message.edit({ embed: embed4 });
+        message.message.reactions
+          .removeAll()
+          .catch(error => console.error("Failed: ", error));
+      }
+    }
+  }
+
+  // flip card !start
   if (reactionOne.has("↪")) {
     if (reactionOne.get("↪").message.id !== "746130077216931941") {
       console.log(
@@ -91,7 +132,7 @@ client.on("messageReactionAdd", message => {
       }
     }
   }
-  // if you get the answer correct, go to the next message
+  // if you get the answer correct, go to the next message - !start
   if (reactionOne.has("👍")) {
     if (reactionOne.get("👍").message.id !== "746130077216931941") {
       if (
@@ -123,7 +164,7 @@ client.on("messageReactionAdd", message => {
       }
     }
   }
-  // if you get the answer wrong, move the message to the back of the queue
+  // if you get the answer wrong, move the message to the back of the queue - !start
   if (reactionOne.has("👎")) {
     if (reactionOne.get("👎").message.id !== "746130077216931941") {
       if (
@@ -155,7 +196,30 @@ client.on("messageReactionAdd", message => {
 });
 
 client.on("message", async message => {
-  if (message.content === "!ping") {
+  if (message.content === "!start2") {
+    const embed3 = {
+      title: "Some title",
+      fields: [
+        {
+          name: "Question",
+          value:
+            "Removing reactions by user is not as straightforward as removing by [...] or removing all reactions. The API does not provide a method for selectively removing reactions of a user"
+        },
+        {
+          name: "\u200b",
+          value:
+            "Press the green apple to flip the card, then thumbs up or down"
+        }
+      ]
+    };
+    embed3.fields[0].value = currentMessage.front;
+    message.channel.send({ embed: embed3 }).then(message => {
+      message.react("↩️");
+      message.react("🍏");
+      message.react("🍎");
+    });
+  }
+  if (message.content === "!start") {
     // send back "Pong." to the channel the message was sent in
     let question2 =
       "\n Question: \n Removing reactions by user is not as straightforward as removing by [...] or removing all reactions. The API does not provide a method for selectively removing reactions of a user";
@@ -225,7 +289,7 @@ client.on("message", async message => {
     );
   }
   if (message.content === "!left") {
-    message.channel.send(`You have ${listOfMessages.length + 1} cards left`);
+    message.channel.send(`You have ${listOfMessages.length} cards left`);
   }
   if (message.content === "!login") {
     let uniqueUser = `${message.author.username}%23${
